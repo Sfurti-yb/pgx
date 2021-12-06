@@ -45,7 +45,8 @@ type ConnConfig struct {
 
 	createdByParseConfig bool // Used to enforce created by ParseConfig rule.
 
-	loadBalance bool
+	loadBalance  bool
+	topologyKeys string
 }
 
 // ParseConfigOptions contains options that control how a config is built such as getsslpassword.
@@ -230,12 +231,23 @@ func ParseConfigWithOptions(connString string, options ParseConfigOptions) (*Con
 
 	loadBalance := true
 	if s, ok := config.RuntimeParams["load_balance"]; ok {
-		log.Println("load balance property found!")
+		log.Println("load balance property found! Value: " + s)
 		delete(config.RuntimeParams, "load_balance")
 		if b, err := strconv.ParseBool(s); err == nil {
 			loadBalance = b
 		} else {
 			return nil, fmt.Errorf("invalid load_balance: %v", err)
+		}
+	}
+
+	topologyKeys := ""
+	if s, ok := config.RuntimeParams["topology_keys"]; ok {
+		log.Println("topology_keys property found! Value: " + s)
+		delete(config.RuntimeParams, "topology_keys")
+		if err := validateTopologyKeys(s); err == nil {
+			topologyKeys = s
+		} else {
+			return nil, fmt.Errorf("invalid topology_keys: %v", err)
 		}
 	}
 
@@ -247,6 +259,7 @@ func ParseConfigWithOptions(connString string, options ParseConfigOptions) (*Con
 		DefaultQueryExecMode:     defaultQueryExecMode,
 		connString:               connString,
 		loadBalance:              loadBalance,
+		topologyKeys:             topologyKeys,
 	}
 
 	return connConfig, nil
