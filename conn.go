@@ -25,7 +25,8 @@ type ConnConfig struct {
 	Tracer QueryTracer
 
 	// Original connection string that was parsed into config.
-	connString string
+	connString  string
+	controlHost string
 
 	// StatementCacheCapacity is maximum size of the statement cache used when executing a query with "cache_statement"
 	// query exec mode.
@@ -253,6 +254,7 @@ func ParseConfigWithOptions(connString string, options ParseConfigOptions) (*Con
 		DescriptionCacheCapacity: descriptionCacheCapacity,
 		DefaultQueryExecMode:     defaultQueryExecMode,
 		connString:               connString,
+		controlHost:              config.Host,
 		loadBalance:              loadBalance,
 		topologyKeys:             topologyKeys,
 	}
@@ -344,8 +346,8 @@ func (c *Conn) Close(ctx context.Context) error {
 
 	err := c.pgConn.Close(ctx)
 
-	requestChan <- &LoadInfo{
-		clusterName: c.config.Host,
+	requestChan <- &ClusterLoadInfo{
+		clusterName: c.config.controlHost + "," + c.config.Host,
 		ctx:         nil,
 	}
 	return err
