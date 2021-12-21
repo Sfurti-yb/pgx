@@ -45,8 +45,9 @@ type ConnConfig struct {
 
 	createdByParseConfig bool // Used to enforce created by ParseConfig rule.
 
-	loadBalance  bool
-	topologyKeys []string
+	loadBalance     bool
+	topologyKeys    []string
+	refreshInterval int64
 }
 
 // ParseConfigOptions contains options that control how a config is built such as getsslpassword.
@@ -247,6 +248,16 @@ func ParseConfigWithOptions(connString string, options ParseConfigOptions) (*Con
 		}
 	}
 
+	refreshInterval := int64(REFRESH_INTERVAL_SECONDS)
+	if s, ok := config.RuntimeParams["refresh_interval"]; ok {
+		delete(config.RuntimeParams, "refresh_interval")
+		if refresh, err := strconv.Atoi(s); err == nil {
+			refreshInterval = int64(refresh)
+		} else {
+			return nil, fmt.Errorf("invalid refresh_interval: %v", err)
+		}
+	}
+
 	connConfig := &ConnConfig{
 		Config:                   *config,
 		createdByParseConfig:     true,
@@ -257,6 +268,7 @@ func ParseConfigWithOptions(connString string, options ParseConfigOptions) (*Con
 		controlHost:              config.Host,
 		loadBalance:              loadBalance,
 		topologyKeys:             topologyKeys,
+		refreshInterval:          refreshInterval,
 	}
 
 	return connConfig, nil
@@ -347,10 +359,7 @@ func (c *Conn) Close(ctx context.Context) error {
 	err := c.pgConn.Close(ctx)
 
 	if c.config.loadBalance {
-		requestChan <- &ClusterLoadInfo{
-			clusterName: c.config.controlHost + "," + c.config.Host,
-			ctx:         nil,
-		}
+		decrementConnCount(c.config.controlHost + "," + c.config.Host)
 	}
 	return err
 }
