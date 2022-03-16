@@ -90,9 +90,9 @@ type Conn struct {
 
 	typeMap *pgtype.Map
 
-	wbuf       []byte
-	eqb        ExtendedQueryBuilder
-	cliUpdated bool
+	wbuf            []byte
+	eqb             ExtendedQueryBuilder
+	closeCntUpdated bool
 }
 
 // Identifier a PostgreSQL identifier or name. Identifiers can be composed of
@@ -354,8 +354,8 @@ func connect(ctx context.Context, config *ConnConfig) (c *Conn, err error) {
 // connection.
 func (c *Conn) Close(ctx context.Context) error {
 	if c.IsClosed() {
-		if !c.cliUpdated && c.config.loadBalance {
-			c.cliUpdated = true
+		if !c.closeCntUpdated && c.config.loadBalance {
+			c.closeCntUpdated = true
 			decrementConnCount(c.config.controlHost + "," + c.config.Host)
 		}
 		return nil
@@ -363,8 +363,8 @@ func (c *Conn) Close(ctx context.Context) error {
 
 	err := c.pgConn.Close(ctx)
 
-	if !c.cliUpdated && c.config.loadBalance {
-		c.cliUpdated = true
+	if !c.closeCntUpdated && c.config.loadBalance {
+		c.closeCntUpdated = true
 		decrementConnCount(c.config.controlHost + "," + c.config.Host)
 	}
 	return err
