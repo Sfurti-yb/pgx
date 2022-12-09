@@ -46,7 +46,7 @@ type ConnConfig struct {
 	createdByParseConfig bool // Used to enforce created by ParseConfig rule.
 
 	loadBalance     bool
-	topologyKeys    []string
+	topologyKeys    map[int][]string
 	refreshInterval int64
 }
 
@@ -239,13 +239,26 @@ func ParseConfigWithOptions(connString string, options ParseConfigOptions) (*Con
 		}
 	}
 
-	var topologyKeys []string = nil
+	var topologyKeys map[int][]string = nil
 	if s, ok := config.RuntimeParams["topology_keys"]; ok {
 		delete(config.RuntimeParams, "topology_keys")
 		if tkeys, err := validateTopologyKeys(s); err == nil {
-			topologyKeys = tkeys
-		} else {
-			return nil, fmt.Errorf("invalid topology_keys: %v", err)
+			topologyKeys = make(map[int][]string)
+			for _, tk := range tkeys {
+				zones := strings.Split(tk, ":")
+				if len(zones) == 1 {
+					topologyKeys[0] = append(topologyKeys[0], zones[0])
+				} else {
+					num, err := strconv.Atoi(zones[1])
+					if err != nil {
+						return nil, fmt.Errorf("invalid PREFERENCE_VALUE")
+					}
+					if num < 1 || num > MAX_PREFERENCE_VALUE {
+						return nil, fmt.Errorf("Invalid preference value for property ", zones[0], " : ", num)
+					}
+					topologyKeys[num-1] = append(topologyKeys[num-1], zones[0])
+				}
+			}
 		}
 	}
 
@@ -253,7 +266,11 @@ func ParseConfigWithOptions(connString string, options ParseConfigOptions) (*Con
 	if s, ok := config.RuntimeParams["refresh_interval"]; ok {
 		delete(config.RuntimeParams, "refresh_interval")
 		if refresh, err := strconv.Atoi(s); err == nil {
-			refreshInterval = int64(refresh)
+			if refresh >= 0 && refresh <= MAX_INTERVAL_SECONDS {
+				refreshInterval = int64(refresh)
+			} else {
+				return nil, fmt.Errorf("refresh_interval has to be >=0 and <=600")
+			}
 		} else {
 			return nil, fmt.Errorf("invalid refresh_interval: %v", err)
 		}
