@@ -268,8 +268,6 @@ func ParseConfigWithOptions(connString string, options ParseConfigOptions) (*Con
 		if refresh, err := strconv.Atoi(s); err == nil {
 			if refresh >= 0 && refresh <= MAX_INTERVAL_SECONDS {
 				refreshInterval = int64(refresh)
-			} else {
-				return nil, fmt.Errorf("refresh_interval has to be >=0 and <=600")
 			}
 		} else {
 			return nil, fmt.Errorf("invalid refresh_interval: %v", err)
