@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jackc/pgx/v5/pgproto3"
+	"github.com/yugabyte/pgx/v5/pgproto3"
 	"github.com/stretchr/testify/require"
 )
 
