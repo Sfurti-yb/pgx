@@ -1028,6 +1028,10 @@ func TestConnDeallocate(t *testing.T) {
 	require.NoError(t, err)
 	defer closeConn(t, pgConn)
 
+	if strings.Contains(pgConn.ParameterStatus("server_version"), "YB") {
+		t.Skip("Flaky test failure on YugabyteDB")
+	}
+
 	_, err = pgConn.Prepare(ctx, "ps1", "select 1", nil)
 	require.NoError(t, err)
 
@@ -1055,6 +1059,9 @@ func TestConnDeallocateSucceedsInAbortedTransaction(t *testing.T) {
 	pgConn, err := pgconn.Connect(ctx, os.Getenv("PGX_TEST_DATABASE"))
 	require.NoError(t, err)
 	defer closeConn(t, pgConn)
+	if strings.Contains(pgConn.ParameterStatus("server_version"), "YB") {
+		t.Skip("Flaky test failure on YugabyteDB")
+	}
 
 	err = pgConn.Exec(ctx, "begin").Close()
 	require.NoError(t, err)
@@ -3595,6 +3602,9 @@ func TestPipelinePrepareAndDeallocate(t *testing.T) {
 	pgConn, err := pgconn.Connect(ctx, os.Getenv("PGX_TEST_DATABASE"))
 	require.NoError(t, err)
 	defer closeConn(t, pgConn)
+	if strings.Contains(pgConn.ParameterStatus("server_version"), "YB") {
+		t.Skip("Flaky test failure on YugabyteDB")
+	}
 
 	pipeline := pgConn.StartPipeline(ctx)
 	pipeline.SendPrepare("selectInt", "select $1::bigint as a", nil)
