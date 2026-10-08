@@ -12,6 +12,7 @@ import (
 	"reflect"
 	"regexp"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -47,6 +48,22 @@ func skipCockroachDB(t testing.TB, db *sql.DB, msg string) {
 	err = conn.Raw(func(driverConn any) error {
 		conn := driverConn.(*stdlib.Conn).Conn()
 		if conn.PgConn().ParameterStatus("crdb_version") != "" {
+			t.Skip(msg)
+		}
+		return nil
+	})
+	require.NoError(t, err)
+}
+
+func skipYugabyteDB(t testing.TB, db *sql.DB, msg string) {
+	conn, err := db.Conn(context.Background())
+	require.NoError(t, err)
+	defer conn.Close()
+
+	err = conn.Raw(func(driverConn any) error {
+		conn := driverConn.(*stdlib.Conn).Conn()
+		serverVersion := conn.PgConn().ParameterStatus("server_version")
+		if strings.Contains(serverVersion, "YB") {
 			t.Skip(msg)
 		}
 		return nil
