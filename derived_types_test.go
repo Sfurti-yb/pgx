@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/yugabyte/pgx/v5"
+	"github.com/yugabyte/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 )
 

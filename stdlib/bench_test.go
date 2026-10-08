@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/yugabyte/pgx/v5"
+	"github.com/yugabyte/pgx/v5/pgtype"
 )
 
 func getSelectRowsCounts(b *testing.B) []int64 {

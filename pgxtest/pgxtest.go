@@ -10,7 +10,7 @@ import (
 	"testing"
 	"strings"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/yugabyte/pgx/v5"
 )
 
 var AllQueryExecModes = []pgx.QueryExecMode{

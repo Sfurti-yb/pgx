@@ -11,9 +11,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	pgx "github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/jackc/pgx/v5/stdlib"
+	pgx "github.com/yugabyte/pgx/v5"
+	"github.com/yugabyte/pgx/v5/pgtype"
+	"github.com/yugabyte/pgx/v5/stdlib"
 )
 
 func testWithKnownOIDQueryExecModes(t *testing.T, f func(t *testing.T, db *sql.DB)) {

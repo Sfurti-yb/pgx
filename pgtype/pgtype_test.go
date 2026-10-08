@@ -15,10 +15,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/jackc/pgx/v5/pgxtest"
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/yugabyte/pgx/v5"
+	"github.com/yugabyte/pgx/v5/pgtype"
+	"github.com/yugabyte/pgx/v5/pgxtest"
+	_ "github.com/yugabyte/pgx/v5/stdlib"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
